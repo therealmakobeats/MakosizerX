@@ -77,7 +77,7 @@ jobs:
 
   macos:
     name: macOS VST3, AU, and installer
-    runs-on: macos-latest
+    runs-on: macos-15-intel
     steps:
       - name: Check out source
         uses: actions/checkout@v4
