@@ -91,7 +91,7 @@ public:
             graphics.fillRoundedRectangle (getLocalBounds().toFloat().reduced (1.0f), 3.0f);
         }
 
-        if (hasKeyboardFocus())
+        if (hasKeyboardFocus (false))
         {
             graphics.setColour (juce::Colours::white.withAlpha (0.8f));
             graphics.drawRoundedRectangle (getLocalBounds().toFloat().reduced (1.0f),

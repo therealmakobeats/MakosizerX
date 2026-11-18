@@ -233,7 +233,7 @@ void MakosizerXAudioProcessor::setStateInformation (const void* data, int sizeIn
                         "value", parameterState.getParameter ("oversampling")
                                      ->convertTo0to1 (0.0f),
                         nullptr);
-                    state.addChild (oversamplingState, nullptr);
+                    state.addChild (oversamplingState, -1, nullptr);
                 }
             }
 

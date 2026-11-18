@@ -268,7 +268,7 @@ juce::Result PresetManager::loadPreset (const juce::File& file)
         const auto currentState = parameterState.copyState().getChildWithProperty (
             idProperty, juce::var (oversamplingParameterId));
         if (currentState.isValid())
-            state.addChild (currentState.createCopy(), nullptr);
+            state.addChild (currentState.createCopy(), -1, nullptr);
     }
 
     if (state.getProperty ("presetName").toString().trim().isEmpty())
