@@ -16,6 +16,11 @@ float effectiveMacroValue (float control, float destroy) noexcept
 {
     return control + destroy * (1.0f - control);
 }
+
+float effectiveDestructiveMacroValue (float control, float destroy) noexcept
+{
+    return effectiveMacroValue (control, std::sqrt (destroy));
+}
 }
 
 MakosizerXDSP::MakosizerXDSP()
@@ -29,7 +34,7 @@ void MakosizerXDSP::prepareToPlay (double sampleRate)
     latencySamples = std::max (1, static_cast<int> (std::round (currentSampleRate * 0.005)));
 
     const auto maximumModulationSamples = static_cast<std::size_t> (
-        std::ceil (currentSampleRate * 0.0035));
+        std::ceil (currentSampleRate * 0.0040));
     const auto delayLength = static_cast<std::size_t> (latencySamples)
                              + maximumModulationSamples + 4;
 
@@ -101,10 +106,10 @@ void MakosizerXDSP::process (float* const* channels, int numChannels, int numSam
 
     const auto activeChannels = std::min (numChannels, 2);
     const auto destroy = clamp01 (parameters.destroy);
-    const auto drive = effectiveMacroValue (clamp01 (parameters.drive), destroy);
+    const auto drive = effectiveDestructiveMacroValue (clamp01 (parameters.drive), destroy);
     const auto vinyl = effectiveMacroValue (clamp01 (parameters.vinyl), destroy);
-    const auto wow = effectiveMacroValue (clamp01 (parameters.wow), destroy);
-    const auto flutter = effectiveMacroValue (clamp01 (parameters.flutter), destroy);
+    const auto wow = effectiveDestructiveMacroValue (clamp01 (parameters.wow), destroy);
+    const auto flutter = effectiveDestructiveMacroValue (clamp01 (parameters.flutter), destroy);
     const auto noise = effectiveMacroValue (clamp01 (parameters.noise), destroy);
     const auto dust = effectiveMacroValue (clamp01 (parameters.dust), destroy);
     const auto crush = effectiveMacroValue (clamp01 (parameters.crush), destroy);
@@ -134,11 +139,11 @@ void MakosizerXDSP::process (float* const* channels, int numChannels, int numSam
     const auto compressorRatio = 1.0f + comp * 7.0f;
     const auto crushBits = 16.0f - crush * 12.0f;
     const auto crushLevels = std::exp2 (crushBits - 1.0f);
-    const auto driveGain = 1.0f + drive * 5.0f;
+    const auto driveGain = 1.0f + drive * 23.0f;
     const auto driveMakeup = 1.0f / std::sqrt (driveGain);
     const auto baseDelay = static_cast<float> (latencySamples);
-    const auto wowDepth = static_cast<float> (currentSampleRate * 0.0018);
-    const auto flutterDepth = static_cast<float> (currentSampleRate * 0.00045);
+    const auto wowDepth = static_cast<float> (currentSampleRate * 0.0028);
+    const auto flutterDepth = static_cast<float> (currentSampleRate * 0.0009);
     const auto limiterThreshold = 1.0f - limiter * 0.25f;
 
     for (int sample = 0; sample < numSamples; ++sample)
@@ -198,8 +203,8 @@ void MakosizerXDSP::process (float* const* channels, int numChannels, int numSam
                 wet *= gain;
             }
 
-            state.wowPhase += twoPi * (0.35 + wow * 0.55) / currentSampleRate;
-            state.flutterPhase += twoPi * (5.0 + flutter * 7.0) / currentSampleRate;
+            state.wowPhase += twoPi * (0.5 + wow * 1.35) / currentSampleRate;
+            state.flutterPhase += twoPi * (7.0 + flutter * 18.0) / currentSampleRate;
             if (state.wowPhase >= twoPi)
                 state.wowPhase -= twoPi;
             if (state.flutterPhase >= twoPi)

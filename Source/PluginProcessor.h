@@ -48,6 +48,7 @@ public:
     ParameterState& getParameterState() noexcept { return parameterState; }
     const ParameterState& getParameterState() const noexcept { return parameterState; }
     PresetManager& getPresetManager() noexcept { return presetManager; }
+    int getOversamplingFactor() const noexcept;
     OutputLevels getAndResetOutputLevels() noexcept;
 
 private:
@@ -57,6 +58,7 @@ private:
     ParameterState parameterState;
     PresetManager presetManager;
     std::array<std::atomic<float>*, 14> parameterValues;
+    std::atomic<float>* oversamplingValue = nullptr;
     MakosizerX::MakosizerXDSP dsp;
     std::atomic<float> leftOutputPeak { 0.0f };
     std::atomic<float> rightOutputPeak { 0.0f };

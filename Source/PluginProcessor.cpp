@@ -44,7 +44,8 @@ MakosizerXAudioProcessor::MakosizerXAudioProcessor()
         parameterState.getRawParameterValue ("limiter"),
         parameterState.getRawParameterValue ("width"),
         parameterState.getRawParameterValue ("mix")
-    }}
+    }},
+      oversamplingValue (parameterState.getRawParameterValue ("oversampling"))
 {
 }
 
@@ -83,6 +84,9 @@ MakosizerXAudioProcessor::createParameterLayout()
     layout.add (std::make_unique<Parameter> (
         juce::ParameterID { "width", 1 }, "Width", Range (0.0f, 2.0f, 0.001f), 1.0f));
     addUnitParameter ("mix", "Mix", 1.0f);
+    layout.add (std::make_unique<juce::AudioParameterChoice> (
+        juce::ParameterID { "oversampling", 1 }, "Oversampling",
+        juce::StringArray { "1x", "2x", "4x", "8x" }, 0));
 
     return layout;
 }
@@ -213,7 +217,28 @@ void MakosizerXAudioProcessor::setStateInformation (const void* data, int sizeIn
     if (const auto xml = getXmlFromBinary (data, sizeInBytes))
     {
         if (xml->hasTagName (parameterState.state.getType()))
-            parameterState.replaceState (juce::ValueTree::fromXml (*xml));
+        {
+            auto state = juce::ValueTree::fromXml (*xml);
+            const juce::Identifier idProperty ("id");
+            auto oversamplingState = state.getChildWithProperty (
+                idProperty, juce::var ("oversampling"));
+            if (! oversamplingState.isValid())
+            {
+                const auto currentOversamplingState = parameterState.copyState()
+                    .getChildWithProperty (idProperty, juce::var ("oversampling"));
+                if (currentOversamplingState.isValid())
+                {
+                    oversamplingState = currentOversamplingState.createCopy();
+                    oversamplingState.setProperty (
+                        "value", parameterState.getParameter ("oversampling")
+                                     ->convertTo0to1 (0.0f),
+                        nullptr);
+                    state.addChild (oversamplingState, nullptr);
+                }
+            }
+
+            parameterState.replaceState (state);
+        }
     }
 }
 
@@ -224,6 +249,13 @@ MakosizerXAudioProcessor::getAndResetOutputLevels() noexcept
         leftOutputPeak.exchange (0.0f, std::memory_order_relaxed),
         rightOutputPeak.exchange (0.0f, std::memory_order_relaxed)
     };
+}
+
+int MakosizerXAudioProcessor::getOversamplingFactor() const noexcept
+{
+    const auto selectedIndex = juce::jlimit (
+        0, 3, juce::roundToInt (oversamplingValue->load (std::memory_order_relaxed)));
+    return 1 << selectedIndex;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

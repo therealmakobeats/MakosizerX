@@ -20,6 +20,7 @@ public:
     static std::vector<FactoryPresetInfo> getFactoryPresets();
 
     juce::Result loadFactoryPreset (const juce::String& presetName);
+    void markCurrentPresetCustom();
     juce::Result savePreset (const juce::File& file, const juce::String& presetName);
     juce::Result loadPreset (const juce::File& file);
 
