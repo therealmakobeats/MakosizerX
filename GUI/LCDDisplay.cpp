@@ -39,12 +39,12 @@ void LCDDisplay::setState (State newState)
 
 void LCDDisplay::paint (juce::Graphics& g)
 {
-    constexpr auto caseColour = juce::Colour (0xff292d28);
-    constexpr auto bezelColour = juce::Colour (0xff111510);
-    constexpr auto screenColour = juce::Colour (0xff132017);
-    constexpr auto brightGreen = juce::Colour (0xffb5ff9b);
-    constexpr auto midGreen = juce::Colour (0xff72bd62);
-    constexpr auto dimGreen = juce::Colour (0xff31583a);
+    const juce::Colour caseColour (0xff292d28);
+    const juce::Colour bezelColour (0xff111510);
+    const juce::Colour screenColour (0xff132017);
+    const juce::Colour brightGreen (0xffb5ff9b);
+    const juce::Colour midGreen (0xff72bd62);
+    const juce::Colour dimGreen (0xff31583a);
 
     g.fillAll (caseColour);
     g.setColour (juce::Colour (0xff41473f));
